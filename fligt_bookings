@@ -1,0 +1,89 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+from datetime import datetime, timedelta
+
+# Initialize WebDriver
+driver = webdriver.Chrome()  # Ensure the path to the WebDriver is set if needed
+driver.maximize_window()
+
+# Navigate to the website
+driver.get("https://www.goindigo.in/")
+time.sleep(3)  # Allow page to load
+
+# Verify landing on the correct page
+print("URL:", driver.current_url)
+print("Title:", driver.title)
+
+# Click on 'Book' option and then 'Flight'
+WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, "//a[@data-testid='book-flight-header']"))
+).click()
+
+# Click on the 1 pax option
+WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, "//div[@data-testid='passengerCount']"))
+).click()
+
+# Increase Adults count to 2 and click 'Done'
+increase_adults_button = driver.find_element(By.XPATH, "//button[@data-testid='adultPaxIncrease']")
+increase_adults_button.click()
+WebDriverWait(driver, 2).until(
+    EC.element_to_be_clickable((By.XPATH, "//button[text()='Done']"))
+).click()
+
+# Enter Hyderabad in the 'From' field
+from_field = driver.find_element(By.XPATH, "//input[@placeholder='From']")
+from_field.click()
+from_field.send_keys("Hyderabad")
+time.sleep(1)
+from_field.send_keys(Keys.RETURN)
+
+# Enter Delhi in the 'To' field
+to_field = driver.find_element(By.XPATH, "//input[@placeholder='To']")
+to_field.click()
+to_field.send_keys("Delhi")
+time.sleep(1)
+to_field.send_keys(Keys.RETURN)
+
+# Select a travel date (1 month from today)
+travel_date = datetime.now() + timedelta(days=30)
+travel_date_str = travel_date.strftime("%d-%b-%Y")
+date_picker = driver.find_element(By.XPATH, f"//td[@data-testid='{travel_date_str}']")
+date_picker.click()
+
+# Click on the 'Search Flight' button
+search_button = driver.find_element(By.XPATH, "//button[@data-testid='search-flight']")
+search_button.click()
+
+# Wait for the results and select the first recommendation
+WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.XPATH, "//button[text()='Select']"))
+).click()
+
+# Click on 'Next'
+WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.XPATH, "//button[text()='Next']"))
+).click()
+
+# Fill passenger details
+WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.XPATH, "//label[text()='Male']/preceding-sibling::input"))
+).click()
+first_name = driver.find_element(By.XPATH, "//input[@placeholder='First Name']")
+last_name = driver.find_element(By.XPATH, "//input[@placeholder='Last Name']")
+dob_field = driver.find_element(By.XPATH, "//input[@placeholder='Date of Birth']")
+
+first_name.send_keys("John")
+last_name.send_keys("Doe")
+dob_field.send_keys("01-Jan-1990")
+
+# Pause to observe the filled form
+time.sleep(5)
+
+# Close the browser
+driver.quit()
